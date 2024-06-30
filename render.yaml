@@ -11,8 +11,6 @@ services:
       - key: FLASK_ENV
         value: development
     plan: starter
-    ports:
-      - port: 5000
 
   - type: web
     name: react-app
@@ -26,7 +24,3 @@ services:
       - key: CHOKIDAR_USEPOLLING
         value: true
     plan: starter
-    ports:
-      - port: 3000
-    dependsOn:
-      - flask-app
