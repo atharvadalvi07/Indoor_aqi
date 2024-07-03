@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sector, Cell, PieChart, Pie, Tooltip, Text, ResponsiveContainer } from 'recharts';
 
-const GaugeChart = ({ value , sensorData}) => {
+const GaugeChart = ({ value }) => {
     const width = 300; 
     const chartValue = value; 
 
