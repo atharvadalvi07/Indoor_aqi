@@ -44,7 +44,7 @@ async function fetchPythonBackendData(indoorImei, outdoorImei, guideline) {
   }
 }
 
-const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline, selectedIEWGuideline}) => {
+const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline, selectedIEWGuideline, sendDataToParent}) => {
   const [co2Data, setCo2Data] = useState([]);
   const [sensorData, setSensorData] = useState({});
   const [showAdvice, setShowAdvice] = useState(false);
@@ -55,6 +55,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
   const [iew, setIewData] = useState([]);
   const [cachedSensorData, setCachedSensorData] = useState({});
   const [lastRefreshTime, setLastRefreshTime] = useState('');
+  const [timeData, setData] = useState("");
 
 
   useEffect(() => {
@@ -107,7 +108,10 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
           minute: 'numeric',
           second: 'numeric'
         });
-        setLastRefreshTime(formattedDate);
+        // setLastRefreshTime(formattedDate);
+        setData(formattedDate);
+        sendDataToParent(formattedDate);
+
         
       } catch (error) {
         setError(error.message);
