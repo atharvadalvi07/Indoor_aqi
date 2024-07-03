@@ -88,7 +88,7 @@ function App() {
           <Route path="/" element={
             <div className="page-header" style={{ scrollPaddingTop: '5px', paddingBottom: '5px' }}>
               <Card className="pt-6 pb-6 shadow-none rounded-none">
-                <div className="flex items-center p-4">
+                <div className="flex items-center p-2">
                   <Link to="/">
                     <img
                       className="w-12 h-12 rounded-full"

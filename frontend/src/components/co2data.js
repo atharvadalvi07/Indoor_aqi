@@ -54,6 +54,8 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
   const [histCo2Data, setHistCo2Data] = useState([]);
   const [iew, setIewData] = useState([]);
   const [cachedSensorData, setCachedSensorData] = useState({});
+  const [lastRefreshTime, setLastRefreshTime] = useState('');
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,6 +97,18 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
           setShowAdvice(true);
           setAdviceMessage(data.co2_advice);
         }
+
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric'
+        });
+        setLastRefreshTime(formattedDate);
+        
       } catch (error) {
         setError(error.message);
         if (Object.keys(cachedSensorData).length > 0) {
@@ -245,6 +259,9 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
           </ResponsiveContainer>
         </div>
         <div className='w-1/3'>
+        {/* <div style={{ display: 'flex', alignItems: 'center', marginLeft: 50}}>
+            <p>Last updated: {lastRefreshTime}</p>
+        </div> */}
           <Card className="shadow-none rounded-lg md:flex gap-6">
             <div className="p-2 flex justify-between w-full">
               <div className="ml-6">
