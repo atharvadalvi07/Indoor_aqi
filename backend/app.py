@@ -7,11 +7,17 @@ from datetime import timedelta, datetime
 import time
 from sklearn.linear_model import LinearRegression
 from flask_cors import CORS
+import pytz
 
 app = Flask(__name__)
 CORS(app)
 
 flag_ac = True
+
+ist= pytz.timezone('Asia/Kolkata')
+
+def now_in_ist():
+    return datetime.now(ist)
 
 ################################################################################
 def calculate_temp_ef(temp):
@@ -210,7 +216,7 @@ def fetch_data_with_retry(url, retries=15, delay=1):
     raise RuntimeError(f"Failed after {retries} attempts")
 
 def get_historical_hourly_data(imei, data_type):
-    end_date = datetime.now()
+    end_date = now_in_ist()
     start_date = end_date - timedelta(days=5)
     
     start_date_str = start_date.strftime('%Y-%m-%dT%H:%M')
@@ -249,10 +255,10 @@ def get_data():
     if not imei or not outdoor_imei:
         return jsonify({"error": "Both indoor and outdoor IMEIs are required"}), 400
 
-    start_date = (datetime.now() - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M')
-    just_prev_date = (datetime.now() - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M')
-    prev_day_start = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M')
-    prev_day_end = (datetime.now() - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M')
+    start_date = (now_in_ist() - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M')
+    just_prev_date = (now_in_ist() - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M')
+    prev_day_start = (now_in_ist() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M')
+    prev_day_end = (now_in_ist() - timedelta(minutes=2)).strftime('%Y-%m-%dT%H:%M')
 
     try:
         df_outdoor = fetch_data_with_retry(f'https://atmos.urbansciences.in/adp/v4/getDeviceDataParam/imei/{outdoor_imei}/params/pm2.5cnc,pm10cnc,co2conc,pres,temp,humidity,vocconc/'
