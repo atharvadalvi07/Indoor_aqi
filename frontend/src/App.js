@@ -5,6 +5,7 @@ import './globals.css';
 import Co2DataCard from './components/co2data'; 
 import GuidelineInfo from './guidelineInfo';
 import LoadingJS from './components/Loading';
+import config from './components/config';
 
 async function fetchPythonBackendData(indoorImei, outdoorImei, guideline) {
   try {

@@ -36,15 +36,16 @@ const Co2BarChart = ({ co2Data }) => {
 
   return (
     <div>
+      <ResponsiveContainer width="90%" height={250}>
       <BarChart width={700} height={300} data={categoryCounts}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" />
-        <YAxis label={{ value: 'Air quality during office hours', angle: -90, position: 'insideBottomLeft', offset: 25 }} />
+        <YAxis label={{ value: 'Air quality during office hours', angle: -90, position: 'insideBottomLeft', offset: 6 }} />
         <Tooltip />
         
         <Bar dataKey="hours" fill="#8884d8" barSize={40}/>
       </BarChart>
-      
+      </ResponsiveContainer>
     </div>
   );
 };

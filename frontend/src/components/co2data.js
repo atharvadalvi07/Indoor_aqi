@@ -321,7 +321,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                   <p className="mt-[18px] text-l font-bold">CO2 Levels (ppm)</p>
                   <div className="">
                     {sensorData ? (
-                      <h3 className="text-s ">
+                      <h3 className="text-s pt-2">
                         Indoor threshold limit: <span className='text-red-500'>{selectedThresholds.co2} ppm</span>
                       </h3>
                     ) : (
@@ -338,7 +338,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2 mr-0" style={{ color: getColor(sensorData.indoor_co2, 'co2') }}>
+                    <p className="text-3xl font-bold ml-2 mr-0 pt-1" style={{ color: getColor(sensorData.indoor_co2, 'co2') }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_co2)} duration={1000} /> <span className="text-l align-text-bottom"> ppm </span>
                     </p>
                   ) : (
@@ -452,7 +452,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2" style={{ color: getColor(sensorData.humidity, 'humidity') }}>
+                    <p className="text-3xl font-bold ml-2 pt-1" style={{ color: getColor(sensorData.humidity, 'humidity') }}>
                       <AnimatedNumber value={getSafeValue(sensorData.humidity)} duration={1000} /> <span className="text-l align-text-bottom"> % </span>
                     </p>
                   ) : (
@@ -492,7 +492,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2 mr-0" style={{ color: getColor(sensorData.tvoc, 'tvoc') }}>
+                    <p className="text-3xl font-bold ml-2 mr-0 pt-1" style={{ color: getColor(sensorData.tvoc, 'tvoc') }}>
                       <AnimatedNumber value={getSafeValue(sensorData.tvoc)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³</span>
                     </p>
                   ) : (
