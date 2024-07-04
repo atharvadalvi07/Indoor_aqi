@@ -8,7 +8,7 @@ import LoadingJS from './components/Loading';
 
 async function fetchPythonBackendData(indoorImei, outdoorImei, guideline) {
   try {
-    const res = await fetch(`http://127.0.0.1:5000/data?imei=${indoorImei}&outdoor_imei=${outdoorImei}&guideline=${guideline}`);
+    const res = await fetch(`${config.backendUrl}/data?imei=${indoorImei}&outdoor_imei=${outdoorImei}&guideline=${guideline}`);
     if (!res.ok) {
       throw new Error(`Failed to fetch data: ${res.statusText}`);
     }
