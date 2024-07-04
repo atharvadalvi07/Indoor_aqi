@@ -129,7 +129,7 @@ const GaugeChart = ({ value }) => {
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
-                transform: 'translate(-47.5%, -30%)',
+                transform: 'translate(-47.5%, -20%)',
                 textAlign: 'center',
                 fontSize: '16px',
                 fontWeight: 'bold'
