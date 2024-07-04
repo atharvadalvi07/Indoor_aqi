@@ -1,18 +1,32 @@
-FROM node:16
-
+# Step 1: Build the React application
+FROM node:14 AS build
 WORKDIR /app
-
-COPY package.json ./
-COPY package-lock.json ./
-
+COPY package.json package-lock.json ./
 RUN npm install
-
 COPY . ./
-
 RUN npm run build
 
-EXPOSE 3000
+# Step 2: Serve the application using Nginx
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 
-RUN ln -s /app/node_modules /app/src/node_modules
+# FROM node:16
 
-CMD ["npm", "start"]
+# WORKDIR /app
+
+# COPY package.json ./
+# COPY package-lock.json ./
+
+# RUN npm install
+
+# COPY . ./
+
+# RUN npm run build
+
+# EXPOSE 3000
+
+# RUN ln -s /app/node_modules /app/src/node_modules
+
+# CMD ["npm", "start"]
