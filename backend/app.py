@@ -267,14 +267,20 @@ def get_data():
         df_indoor = fetch_data_with_retry(f'https://atmos.urbansciences.in/adp/v4/getDeviceDataParam/imei/{imei}/params/pm2.5cnc,pm10cnc,co2conc,pres,temp,humidity,vocconc/'
                                           + f'startdate/{start_date}/enddate/{just_prev_date}/'
                                           + f'ts/mm/avg/1/api/mm8IZ3MGrj?gaps=1&gap_value=NULL')
-        df_prev_day = fetch_data_with_retry(f'https://atmos.urbansciences.in/adp/v4/getDeviceDataParam/imei/{imei}/params/co2conc/'
+        df_prev_day = fetch_data_with_retry(f'https://atmos.urbansciences.in/adp/v4/getDeviceDataParam/imei/{imei}/params/pm2.5cnc,co2conc,temp,humidity,vocconc/'
                                             + f'startdate/{prev_day_start}/enddate/{prev_day_end}/'
                                             + f'ts/mm/avg/1/api/mm8IZ3MGrj?gaps=1&gap_value=NULL')
+        df_prev_day_outdoor = fetch_data_with_retry(f'https://atmos.urbansciences.in/adp/v4/getDeviceDataParam/imei/{outdoor_imei}/params/pm2.5cnc,co2conc,temp,humidity,vocconc/'
+                                            + f'startdate/{prev_day_start}/enddate/{prev_day_end}/'
+                                            + f'ts/mm/avg/1/api/mm8IZ3MGrj?gaps=1&gap_value=NULL')
+
 
         df_indoor["dt_time"] = pd.to_datetime(df_indoor["dt_time"])
         df_indoor.set_index("dt_time", inplace=True, drop=True)
         df_prev_day["dt_time"] = pd.to_datetime(df_prev_day["dt_time"])
         df_prev_day.set_index("dt_time", inplace=True, drop=True)
+        df_prev_day_outdoor["dt_time"] = pd.to_datetime(df_prev_day_outdoor["dt_time"])
+        df_prev_day_outdoor.set_index("dt_time", inplace=True, drop=True)
 
         date_obj = datetime.strptime(just_prev_date, "%Y-%m-%dT%H:%M")
         formatted_date_str = date_obj.strftime("%d %b %Y %H:%M:%S")
@@ -307,15 +313,47 @@ def get_data():
         df_prev_day = df_prev_day.dropna(subset=['co2conc'])
         df_prev_day = df_prev_day.resample('h').mean(numeric_only=True)
         df_prev_day = round(df_prev_day, 1)
-        
         co2_prev_day = df_prev_day["co2conc"].tolist()
         timestamps_prev_day = df_prev_day.index.strftime('%Y-%m-%dT%H:%M:%S').tolist()
-        co2_prev_day_data = [{"time": t, "co2": c} for t, c in zip(timestamps_prev_day, co2_prev_day)]
+        co2_prev_day_data = [{"time": t, "value": c} for t, c in zip(timestamps_prev_day, co2_prev_day)]
+
+        df_prev_day["temp"] = pd.to_numeric(df_prev_day["temp"], errors='coerce')
+        df_prev_day = df_prev_day.dropna(subset=['temp'])
+        df_prev_day = df_prev_day.resample('h').mean(numeric_only=True)
+        df_prev_day = round(df_prev_day, 1)
+        temp_prev_day = df_prev_day["temp"].tolist()
+        timestamps_prev_day = df_prev_day.index.strftime('%Y-%m-%dT%H:%M:%S').tolist()
+        temp_prev_day_data = [{"time": t, "value": c} for t, c in zip(timestamps_prev_day, temp_prev_day)]
+
+        df_prev_day["pm2.5cnc"] = pd.to_numeric(df_prev_day["pm2.5cnc"], errors='coerce')
+        df_prev_day = df_prev_day.dropna(subset=['pm2.5cnc'])
+        df_prev_day = df_prev_day.resample('h').mean(numeric_only=True)
+        df_prev_day = round(df_prev_day, 1)
+        pm25_prev_day = df_prev_day["pm2.5cnc"].tolist()
+        timestamps_prev_day = df_prev_day.index.strftime('%Y-%m-%dT%H:%M:%S').tolist()
+        pm25_prev_day_data = [{"time": t, "value": c} for t, c in zip(timestamps_prev_day, pm25_prev_day)]
+
+        df_prev_day["humidity"] = pd.to_numeric(df_prev_day["humidity"], errors='coerce')
+        df_prev_day = df_prev_day.dropna(subset=['humidity'])
+        df_prev_day = df_prev_day.resample('h').mean(numeric_only=True)
+        df_prev_day = round(df_prev_day, 1)
+        humidity_prev_day = df_prev_day["humidity"].tolist()
+        timestamps_prev_day = df_prev_day.index.strftime('%Y-%m-%dT%H:%M:%S').tolist()
+        humidity_prev_day_data = [{"time": t, "value": c} for t, c in zip(timestamps_prev_day, humidity_prev_day)]
+
+        df_prev_day_outdoor["vocconc"] = pd.to_numeric(df_prev_day_outdoor["vocconc"], errors='coerce')
+        df_prev_day_outdoor = df_prev_day_outdoor.dropna(subset=['vocconc'])
+        df_prev_day_outdoor = df_prev_day_outdoor.resample('h').mean(numeric_only=True)
+        df_prev_day_outdoor = round(df_prev_day_outdoor, 1)
+        vocconc_prev_day = df_prev_day_outdoor["vocconc"].tolist()
+        timestamps_prev_day = df_prev_day_outdoor.index.strftime('%Y-%m-%dT%H:%M:%S').tolist()
+        vocconc_prev_day_data = [{"time": t, "value": c} for t, c in zip(timestamps_prev_day, vocconc_prev_day)]
 
         df_indoor["hour"] = df_indoor.index.hour
         df_indoor["day"] = df_indoor.index.date
         df_indoor["minutes"] = df_indoor.index.minute
         grouped = df_indoor.groupby(['day', 'hour'])
+        
 
         m_value = None
         for (day, hour), group in grouped:
@@ -388,8 +426,7 @@ def get_data():
         iew_co2 = calculate_iew_co2(co2_indoor)
         iew_ach = calculate_iew_ach(m_value)  
         iew_tvoc = calculate_iew_tvoc(voc_outdoor)
-        
-        
+
         
         response = {
             "timestamp": formatted_date_str,
@@ -412,6 +449,10 @@ def get_data():
             "temp_advice": temp_advice,
             "co2_advice": co2_advice,
             "co2_prev_day": co2_prev_day_data,
+            "temp_prev_day": temp_prev_day_data,
+            "pm25_prev_day": pm25_prev_day_data,
+            "humidity_prev_day": humidity_prev_day_data,
+            "TVOC_prev_day": vocconc_prev_day_data,
             "aqi_advice": aqi_advice,
             "historical_humidity_indoor": I_humidity_data,
             "historical_temperature_indoor": I_temperature_data,
@@ -419,6 +460,8 @@ def get_data():
             "historical_humidity_outdoor": O_humidity_data,
             "historical_temperature_outdoor": O_temperature_data
         }
+
+
 
         return jsonify(response)
     except Exception as e:

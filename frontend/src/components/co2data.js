@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Skeleton, Snackbar, Alert} from '@mui/material';
-import { AiOutlineWarning } from 'react-icons/ai';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
-} from 'recharts';
+import { Card, Skeleton, Snackbar, Alert, Button, IconButton} from '@mui/material';
+import { ResponsiveContainer, AreaChart, defs, linearGradient, stop, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine, Area } from 'recharts';
 import getColor from './colorscale';
 import Co2BarChart from './barChart';
 import AnimatedNumber from './AnimatedNumber';
@@ -12,11 +9,13 @@ import GaugeChart from './gaugeChart';
 import SpiderChart from './radarChart';
 // import Slide from '@mui/material/Slide';
 import config from './config';
+import getGuidelineColor from './guidelineColor';
+import ShowChartIcon from "@mui/icons-material/ShowChart";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const Warning = ({ text }) => (
   <div className="warning">
-    <AiOutlineWarning className="warning-icon" />
-    <span className="warning-text">{text}</span>
+    <span className="justify-between">{text}</span>
   </div>
 );
 
@@ -44,18 +43,50 @@ async function fetchPythonBackendData(indoorImei, outdoorImei, guideline) {
   }
 }
 
-const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline, selectedIEWGuideline, sendDataToParent}) => {
-  const [co2Data, setCo2Data] = useState([]);
-  const [sensorData, setSensorData] = useState({});
-  const [showAdvice, setShowAdvice] = useState(false);
-  const [adviceMessage, setAdviceMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [histCo2Data, setHistCo2Data] = useState([]);
-  const [iew, setIewData] = useState([]);
-  const [cachedSensorData, setCachedSensorData] = useState({});
-  const [lastRefreshTime, setLastRefreshTime] = useState('');
-  const [timeData, setData] = useState("");
+const theme = createTheme({
+  palette: {
+    grey: {
+      main: '#757575',
+      contrastText: '#ffffff',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          padding: '2px 4px',
+          fontSize: '10px',
+          minWidth: 'auto',
+        },
+        startIcon: {
+          padding: 0,
+          margin: 0,
+        },
+      },
+    },
+  },
+});
+
+const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline, selectedIEWGuideline}) => {
+    const [co2Data, setCo2Data] = useState([]);
+    const [tempData, setTempData] = useState([]);
+    const [humidityData, setHumidityData] = useState([]);
+    const [pm25Data, setPm25Data] = useState([]);
+    const [tvocData, setTVOCData] = useState([]);
+    const [sensorData, setSensorData] = useState({});
+    const [showAdvice, setShowAdvice] = useState(false);
+    const [adviceMessage, setAdviceMessage] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [histCo2Data, setHistCo2Data] = useState([]);
+    const [iew, setIewData] = useState([]);
+    const [cachedSensorData, setCachedSensorData] = useState({});
+    const [lastRefreshTime, setLastRefreshTime] = useState('');
+    const [selectedPollutantData, setSelectedPollutantData] = useState({co2Data});
+    const [selectedValue, setSelectedPollutantValue] = useState({});
+    const [selectedGuide, setSelectedGuideValue] = useState({selectedGuideline});
+    const [showGraph, setShowGraph] = useState(false);
+    const [pollutantName, setPollutantName] = useState({});
 
 
   useEffect(() => {
@@ -65,6 +96,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
       try {
         const data = await fetchPythonBackendData(selectedDevice, selectedOutdoorDevice, selectedIEWGuideline);
         setCo2Data(data.co2_prev_day);
+        setTempData(data.temp_prev_day);
+        setHumidityData(data.humidity_prev_day);
+        setPm25Data(data.pm25_prev_day);
+        setTVOCData(data.TVOC_prev_day);
+
         setSensorData({
           timestamp: data.timestamp,
           indoor_co2: data.indoor_co2,
@@ -108,10 +144,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
           minute: 'numeric',
           second: 'numeric'
         });
-        // setLastRefreshTime(formattedDate);
-        setData(formattedDate);
-        sendDataToParent(formattedDate);
-
+        setLastRefreshTime(formattedDate);
         
       } catch (error) {
         setError(error.message);
@@ -124,7 +157,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 120000); // Fetch data every 5 minutes
+    const interval = setInterval(fetchData, 120000);
     return () => clearInterval(interval);
   }, [selectedDevice, selectedOutdoorDevice, selectedIEWGuideline]);
 
@@ -237,39 +270,128 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
 
   const selectedThresholds = guidelines[selectedGuideline];
 
+  const handlePollutantClick = (pollutantData, colorValue, guide, name) => {
+    setSelectedPollutantData(pollutantData);
+    setSelectedPollutantValue(colorValue);
+    setSelectedGuideValue(guide);
+    setPollutantName(name);
+    setShowGraph(true);
+  };
+
   return (
     <Card className="p-2 m-1 shadow-none rounded-lg">
       <div className="flex gap-6">
-        <div className="w-2/3 pb-0">
-          <ResponsiveContainer width="100%" height="85%">
+        <div className="w-4/5 pb-0">
+            {/* <CO2AreaChart 
+                co2Data={selectedPollutantData} 
+                sensorData={selectedValue} 
+                selectedThresholds={selectedGuide} 
+            /> */}
+          {!showGraph ? (
+            <ResponsiveContainer width="100%" height="85%">
             <AreaChart data={co2Data}>
               <defs>
                 <linearGradient id='co2level' x1='0' y1='0' x2='0' y2='1'>
-                  <stop offset="5%" stopColor={getColor(sensorData.indoor_co2, 'co2')} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={getColor(sensorData.indoor_co2, 'co2')} stopOpacity={0} />
+                  <stop offset="5%" stopColor={getGuidelineColor(sensorData.indoor_co2, 'co2', 'ISHRAE_A')} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={getGuidelineColor(sensorData.indoor_co2, 'co2', 'ISHRAE_A')} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" tickFormatter={(time) => {
-                const hours = new Date(time).getHours();
-                return `${hours}`;
-              }} />
-              <YAxis domain={[0, 3000]} label={{ value: 'Carbon Dioxide levels (PPM)', angle: -90, position: 'Center', dx: -22, dy: 10 }} />
+              <XAxis 
+                dataKey="time" 
+                tickFormatter={(time) => {
+                  const hours = new Date(time).getHours();
+                  return `${hours}`;
+                }} 
+              />
+              <YAxis 
+                label={{ 
+                  value: `CO₂ conc in last 24 hrs`, 
+                  angle: -90, 
+                  position: 'Center', 
+                  dx: -20, 
+                  dy: 8 
+                }} 
+              />
               <Tooltip />
-              <ReferenceLine y={selectedThresholds.co2} label={{ value: "Threshold limit", position: "insideRight", fill: "black", fontSize: 12, fontWeight: "bold", dy: -10 }} stroke="red" strokeDasharray="3 3" />
-              <Area type="monotone" dataKey="co2" stroke={getColor(sensorData.indoor_co2, 'co2')} fill="url(#co2level)" 
-                    dot = {true}/>
+              <ReferenceLine 
+                y={selectedThresholds.co2} 
+                label={{ 
+                  value: "Threshold limit", 
+                  position: "insideRight", 
+                  fill: "black", 
+                  fontSize: 12, 
+                  fontWeight: "bold", 
+                  dy: -10 
+                }} 
+                stroke="red" 
+                strokeDasharray="3 3" 
+              />
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke={getGuidelineColor(sensorData.indoor_co2, 'co2', 'ISHRAE_A')} 
+                fill="url(#co2level)" 
+                dot={true}
+              />
             </AreaChart>
           </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height="85%">
+              <AreaChart data={selectedPollutantData}>
+                <defs>
+                  <linearGradient id='co2level' x1='0' y1='0' x2='0' y2='1'>
+                    <stop offset="5%" stopColor={selectedValue} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={selectedValue} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="time" 
+                  tickFormatter={(time) => {
+                    const hours = new Date(time).getHours();
+                    return `${hours}`;
+                  }} 
+                />
+                <YAxis 
+                  label={{ 
+                    value: `${pollutantName} in last 24 hrs`, 
+                    angle: -90, 
+                    position: 'Center', 
+                    dx: -20, 
+                    dy: 8 
+                  }} 
+                />
+                <Tooltip />
+                <ReferenceLine 
+                  y={selectedGuide} 
+                  label={{ 
+                    value: "Threshold limit", 
+                    position: "insideRight", 
+                    fill: "black", 
+                    fontSize: 12, 
+                    fontWeight: "bold", 
+                    dy: -10 
+                  }} 
+                  stroke="red" 
+                  strokeDasharray="3 3" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke={selectedValue} 
+                  fill="url(#co2level)" 
+                  dot={true}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
-        <div className='w-1/3'>
-        {/* <div style={{ display: 'flex', alignItems: 'center', marginLeft: 50}}>
-            <p>Last updated: {lastRefreshTime}</p>
-        </div> */}
+        <div className='w-1/5'>
           <Card className="shadow-none rounded-lg md:flex gap-6">
             <div className="p-2 flex justify-between w-full">
               <div className="ml-6">
-                <p className="mt-[18px] text-l font-bold">Ambient CO2 Levels (ppm)</p>
+                <p className="mt-[18px] text-l font-bold">Ambient CO<sub>2</sub> Levels (ppm)</p>
                 <div className="pt-3">
                   {sensorData ? (
                     <h3 className="text-s">
@@ -289,8 +411,8 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
               <div className="flex items-center ">
                 <div className="border-l-2 border-gray-300 h-full ml-0 mr-4"></div>
                 {sensorData ? (
-                  <p className="text-3xl font-bold" style={{ color: getColor(sensorData.outdoor_co2, 'co2') }}>
-                    <AnimatedNumber value={getSafeValue(sensorData.outdoor_co2)} duration={1000} /> <span className="text-xl"> ppm </span>
+                  <p className="text-3xl font-bold" style={{ color: getGuidelineColor(sensorData.outdoor_co2, 'co2', selectedGuideline) }}>
+                    <AnimatedNumber value={getSafeValue(sensorData.outdoor_co2)} duration={1000} /> <span className="text-l align-text-bottom"> ppm </span>
                   </p>
                 ) : (
                   <Skeleton
@@ -306,7 +428,6 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
           </Card>
 
           <Card className="shadow-none rounded-lg md:flex gap-6">
-            {sensorData.co2_advice && <Warning text={sensorData.co2_advice} />}
             {sensorData.temp_advice && <Warning text={sensorData.temp_advice} />}
             {sensorData.aqi_advice && <Warning text={sensorData.aqi_advice} />}
           </Card>
@@ -316,14 +437,17 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
         <Card className=" shadow-none rounded-lg flex gap-6">
           <div>
             <Card className="shadow-none rounded-lg flex p-0">
+            
               <div className="flex justify-between w-full ">
                 <div className="ml-6 mr-0">
-                  <p className="mt-[18px] text-l font-bold">CO2 Levels (ppm)</p>
+                  <p className="mt-[18px] text-l font-bold" style={{color:'black'}}>CO<sub>2</sub> Levels (ppm)</p>
                   <div className="">
                     {sensorData ? (
-                      <h3 className="text-s pt-2">
+                      <h3 className="text-s ">
                         Indoor threshold limit: <span className='text-red-500'>{selectedThresholds.co2} ppm</span>
+                        
                       </h3>
+                      
                     ) : (
                       <Skeleton
                         variant="text"
@@ -338,8 +462,18 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2 mr-0 pt-1" style={{ color: getColor(sensorData.indoor_co2, 'co2') }}>
+                    <p className="text-3xl font-bold ml-2 mr-0" style={{ color: getGuidelineColor(sensorData.indoor_co2, 'co2', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_co2)} duration={1000} /> <span className="text-l align-text-bottom"> ppm </span>
+                      <ThemeProvider theme={theme}>
+                      <p><Button 
+                        variant="contained" 
+                        color="grey" 
+                        size='small' 
+                        sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
+                        onClick={() => handlePollutantClick(co2Data, getGuidelineColor(sensorData.indoor_co2, 'co2', selectedGuideline), selectedThresholds.co2, 'CO₂ conc')}>
+                      <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
+                      </Button></p>
+                      </ThemeProvider>
                     </p>
                   ) : (
                     <Skeleton
@@ -351,17 +485,22 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     />
                   )}
                 </div>
+                
               </div>
+              
+            {/* </Button> */}
             </Card>
           </div>
           <div>
             <Card className="shadow-none rounded-lg flex gap-6">
               <div className="flex justify-between w-full">
                 <div className="ml-6 mr-0">
-                  <p className="mt-[18px] text-l font-bold">PM 2.5 Concentration</p>
+                  <p className="mt-[18px] text-l font-bold">PM<sub>2.5</sub> Concentration</p>
                   <div className="mr-0">
                     {sensorData ? (
-                      <h3 className=" text-s">Indoor threshold limit: <span className='text-red-500'>{selectedThresholds.pm25} µg/m³</span></h3>
+                      <h3 className=" text-s">Indoor threshold limit: <span className='text-red-500'>{selectedThresholds.pm25} µg/m³</span>
+                      
+                      </h3>
                     ) : (
                       <Skeleton
                         variant="text"
@@ -371,14 +510,25 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                         }}
                       />
                     )}
+                    
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2" style={{ color: getColor(sensorData.indoor_pm25, 'pm25') }}>
+                    <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.indoor_pm25, 'pm25', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_pm25)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³ </span>
+                      <ThemeProvider theme={theme}>
+                      <p><Button variant="contained" 
+                        color="grey" 
+                        size='small' 
+                        sx={{ padding: 1, fontSize: '10px', minWidth: 'auto'}}
+                        onClick={() => handlePollutantClick(pm25Data, getGuidelineColor(sensorData.indoor_pm25, 'pm25', selectedGuideline), selectedThresholds.pm25, "PM<sub>2.5</sub> conc")}>
+                        <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
+                      </Button></p>
+                      </ThemeProvider>
                     </p>
+                    
                   ) : (
                     <Skeleton
                       variant="text"
@@ -397,9 +547,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
               <div className="flex justify-between w-full">
                 <div className="ml-6 mr-0">
                   <p className="mt-[18px] text-l font-bold">Zone air temperature</p>
-                  <div className="">
+                  <div className="mr-0">
                     {sensorData ? (
-                      <h3 className="text-s">Comfort range: <span className='text-green-500'>{selectedThresholds.temp.min}°C - {selectedThresholds.temp.max}°C</span></h3>
+                      <h3 className="text-s">Comfort range: <span className='text-green-500'>{selectedThresholds.temp.min}°C - {selectedThresholds.temp.max}°C</span>
+                      
+                      </h3>
                     ) : (
                       <Skeleton
                         variant="text"
@@ -409,13 +561,23 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                         }}
                       />
                     )}
+
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2" style={{ color: getColor(sensorData.indoor_temperature, 'temp') }}>
+                    <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.indoor_temperature, 'temp', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_temperature)} duration={1000} /> <span className="text-l align-text-bottom"> °C </span>
+                      <ThemeProvider theme={theme}>
+                      <p><Button variant="contained" 
+                        color="grey" 
+                        size='small' 
+                        sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
+                        onClick={() => handlePollutantClick(tempData, getGuidelineColor(sensorData.indoor_temperature, 'temp', selectedGuideline), 23, "Temperature value")}>
+                        <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
+                      </Button></p>
+                      </ThemeProvider>
                     </p>
                   ) : (
                     <Skeleton
@@ -435,9 +597,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
               <div className="flex justify-between w-full">
                 <div className="ml-6 mr-0">
                   <p className="mt-[18px] text-l font-bold">Humidity</p>
-                  <div className="">
+                  <div className="mr-0">
                     {sensorData ? (
-                      <h3 className=" text-s">Comfort range: <span className='text-green-500'>{selectedThresholds.humidity.min}% - {selectedThresholds.humidity.max}%</span></h3>
+                      <h3 className=" text-s">Comfort range: <span className='text-green-500'>{selectedThresholds.humidity.min}% - {selectedThresholds.humidity.max}%</span>
+                      
+                      </h3>
                     ) : (
                       <Skeleton
                         variant="text"
@@ -452,8 +616,18 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2 pt-1" style={{ color: getColor(sensorData.humidity, 'humidity') }}>
-                      <AnimatedNumber value={getSafeValue(sensorData.humidity)} duration={1000} /> <span className="text-l align-text-bottom"> % </span>
+                    <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.humidity, 'humidity', selectedGuideline) }}>
+                      <AnimatedNumber value={getSafeValue(sensorData.humidity)} duration={1000} /> 
+                      <p></p><span className="text-l align-text-bottom"> % </span>
+                      <ThemeProvider theme={theme}>
+                      <p><Button variant="contained" 
+                        color="grey" 
+                        size='small' 
+                        sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
+                        onClick={() => handlePollutantClick(humidityData, getGuidelineColor(sensorData.humidity, 'humidity', selectedGuideline), 70, "Humidity value")}>
+                        <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
+                      </Button></p>
+                      </ThemeProvider>
                     </p>
                   ) : (
                     <Skeleton
@@ -477,6 +651,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     {sensorData ? (
                       <h3 className="text-s">
                         Indoor threshold limit: <span className='text-red-500'>{selectedThresholds.tvoc} µg/m³</span>
+                        
                       </h3>
                     ) : (
                       <Skeleton
@@ -492,8 +667,17 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                 <div className="flex items-center">
                   <div className="border-l-2 border-gray-300 h-full"></div>
                   {sensorData ? (
-                    <p className="text-3xl font-bold ml-2 mr-0 pt-1" style={{ color: getColor(sensorData.tvoc, 'tvoc') }}>
+                    <p className="text-3xl font-bold ml-2 mr-0" style={{ color: getGuidelineColor(sensorData.tvoc, 'tvoc', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.tvoc)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³</span>
+                      <ThemeProvider theme={theme}>
+                      <p ><Button variant="contained" 
+                        color="grey" 
+                        size='small' 
+                        sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
+                        onClick={() => handlePollutantClick(tvocData, getGuidelineColor(sensorData.tvoc, 'tvoc', selectedGuideline), selectedThresholds.tvoc, "TVOC")}>
+                      <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
+                      </Button></p>
+                      </ThemeProvider>
                     </p>
                   ) : (
                     <Skeleton
@@ -513,7 +697,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
       <div className="charts-container">
         <div className='chart-wrapper flex '>
             <GaugeChart value = {sensorData.wellness_index}/>
-            <SpiderChart data = {sensorData} color={getColor(sensorData.wellness_index, 'iew')}/>   
+            <SpiderChart data = {sensorData} color={getGuidelineColor(sensorData.wellness_index, 'iew', selectedGuideline)}/>   
         </div>
         <div className="chart-wrapper">
           <Co2BarChart co2Data={histCo2Data} /> 
@@ -550,4 +734,3 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
 };
 
 export default Co2DataCard;
-

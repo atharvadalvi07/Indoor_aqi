@@ -3,10 +3,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 const Co2BarChart = ({ co2Data }) => {
   const categories = [
-    { label: 'Acceptable', range: [0, 800], color: '#008080' },
-    { label: 'Moderately Polluted', range: [800, 1200], color: '#FFB6C1' },
-    { label: 'Poor', range: [1200, 1400], color: '#FF6347' },
-    { label: 'Very Poor', range: [1400, 2000], color: '#8B0000' },
+    { label: 'Acceptable', range: [0, 800], color: '#00B050' },
+    { label: 'Moderate', range: [800, 1200], color: '#FFA500' },
+    { label: 'Poor', range: [1200, 1400], color: '#FF8200' },
+    { label: 'Very Poor', range: [1400, 2000], color: '#EF3340' },
     { label: 'Severe', range: [2000, Infinity], color: '#000000' },
   ];
 
@@ -19,8 +19,11 @@ const Co2BarChart = ({ co2Data }) => {
 
  
   const filteredData = co2Data.filter(data => {
-    const hour = new Date(data.time).getHours();
-    return hour >= 8 && hour < 20;
+    const date = new Date(data.time);
+    const hour = date.getHours();
+    const day = date.getDay();
+  
+    return hour >= 8 && hour < 20 && day >= 1 && day <= 5;
   });
 
  
