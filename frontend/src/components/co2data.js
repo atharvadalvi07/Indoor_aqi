@@ -67,7 +67,7 @@ const theme = createTheme({
   },
 });
 
-const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline, selectedIEWGuideline}) => {
+const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline, selectedIEWGuideline, sendDataToParent}) => {
     const [co2Data, setCo2Data] = useState([]);
     const [tempData, setTempData] = useState([]);
     const [humidityData, setHumidityData] = useState([]);
@@ -88,6 +88,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
     const [showGraph, setShowGraph] = useState(false);
     const [pollutantName, setPollutantName] = useState({});
     const [clickedButton, setClickedButton] = useState(null);
+    const [timeData, setData] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -144,7 +145,9 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
           minute: 'numeric',
           second: 'numeric'
         });
-        setLastRefreshTime(formattedDate);
+        // setLastRefreshTime(formattedDate);
+        setData(formattedDate);
+        sendDataToParent(formattedDate);
         
       } catch (error) {
         setError(error.message);

@@ -32,6 +32,7 @@ function App() {
   const [selectedGuideline, setSelectedGuideline] = useState('ISHRAE_A');
   const [selectedIEWGuideline, setSelectedIEWGuideline] = useState('Wellness');
   const [lastRefreshTime, setLastRefreshTime] = useState('');
+  const [dataFromChild, setDataFromChild] = useState("");
 
   const handleGuidelineChange = (event) => {
     setSelectedGuideline(event.target.value);
@@ -48,6 +49,11 @@ function App() {
   const handleIEWGuidelineChange = (event) => {
     setSelectedIEWGuideline(event.target.value);
   }
+
+  function handleDataFromChild(data) {
+    setDataFromChild(data);
+  }
+  console.log("time", dataFromChild)
 
   useEffect(() => {
     async function getData() {
@@ -201,7 +207,7 @@ function App() {
                       
                     </div>
                     <div style={{ display: 'flex', alignItems: 'right', marginLeft: 100}}>
-                        <p>Last updated: {lastRefreshTime}</p>
+                        <p>Last updated: {dataFromChild}</p>
                       </div>
                   </div>
                 </div>
@@ -216,7 +222,7 @@ function App() {
             <p>Error: {error}</p>
           ) : sensorData ? (
             <div>
-              <Co2DataCard selectedDevice={selectedDevice} selectedOutdoorDevice={selectedOutdoorDevice} selectedGuideline={selectedGuideline} selectedIEWGuideline={selectedIEWGuideline}/>
+              <Co2DataCard selectedDevice={selectedDevice} selectedOutdoorDevice={selectedOutdoorDevice} selectedGuideline={selectedGuideline} selectedIEWGuideline={selectedIEWGuideline} sendDataToParent={handleDataFromChild}/>
             </div>
           ) : (
             <p>No data available</p>
