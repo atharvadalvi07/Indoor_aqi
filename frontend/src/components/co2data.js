@@ -466,7 +466,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_co2)} duration={1000} /> <span className="text-l align-text-bottom"> ppm </span>
                       <ThemeProvider theme={theme}>
                       <p><Button 
-                        variant="contained" 
+                        variant="outlined" 
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
@@ -519,7 +519,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.indoor_pm25, 'pm25', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_pm25)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³ </span>
                       <ThemeProvider theme={theme}>
-                      <p><Button variant="contained" 
+                      <p><Button variant="outlined" 
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto'}}
@@ -570,7 +570,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.indoor_temperature, 'temp', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_temperature)} duration={1000} /> <span className="text-l align-text-bottom"> °C </span>
                       <ThemeProvider theme={theme}>
-                      <p><Button variant="contained" 
+                      <p><Button variant="outlined" 
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
@@ -620,7 +620,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                       <AnimatedNumber value={getSafeValue(sensorData.humidity)} duration={1000} /> 
                       <p></p><span className="text-l align-text-bottom"> % </span>
                       <ThemeProvider theme={theme}>
-                      <p><Button variant="contained" 
+                      <p><Button variant="outlined" 
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
@@ -670,7 +670,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     <p className="text-3xl font-bold ml-2 mr-0" style={{ color: getGuidelineColor(sensorData.tvoc, 'tvoc', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.tvoc)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³</span>
                       <ThemeProvider theme={theme}>
-                      <p ><Button variant="contained" 
+                      <p ><Button variant="outlined" 
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
