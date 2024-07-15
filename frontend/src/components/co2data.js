@@ -87,7 +87,7 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
     const [selectedGuide, setSelectedGuideValue] = useState({selectedGuideline});
     const [showGraph, setShowGraph] = useState(false);
     const [pollutantName, setPollutantName] = useState({});
-
+    const [clickedButton, setClickedButton] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -270,12 +270,13 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
 
   const selectedThresholds = guidelines[selectedGuideline];
 
-  const handlePollutantClick = (pollutantData, colorValue, guide, name) => {
+  const handlePollutantClick = (pollutantData, colorValue, guide, name, buttonName) => {
     setSelectedPollutantData(pollutantData);
     setSelectedPollutantValue(colorValue);
     setSelectedGuideValue(guide);
     setPollutantName(name);
     setShowGraph(true);
+    setClickedButton(buttonName);
   };
 
   return (
@@ -466,11 +467,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_co2)} duration={1000} /> <span className="text-l align-text-bottom"> ppm </span>
                       <ThemeProvider theme={theme}>
                       <p><Button 
-                        variant="outlined" 
+                        variant={clickedButton === 'CO2' ? 'contained' : 'outlined'}
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
-                        onClick={() => handlePollutantClick(co2Data, getGuidelineColor(sensorData.indoor_co2, 'co2', selectedGuideline), selectedThresholds.co2, 'CO₂ conc')}>
+                        onClick={() => handlePollutantClick(co2Data, getGuidelineColor(sensorData.indoor_co2, 'co2', selectedGuideline), selectedThresholds.co2, 'CO₂ conc', 'CO2')}>
                       <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
                       </Button></p>
                       </ThemeProvider>
@@ -519,11 +520,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.indoor_pm25, 'pm25', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_pm25)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³ </span>
                       <ThemeProvider theme={theme}>
-                      <p><Button variant="outlined" 
+                      <p><Button variant={clickedButton === 'PM 2.5' ? 'contained' : 'outlined'}
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto'}}
-                        onClick={() => handlePollutantClick(pm25Data, getGuidelineColor(sensorData.indoor_pm25, 'pm25', selectedGuideline), selectedThresholds.pm25, "PM<sub>2.5</sub> conc")}>
+                        onClick={() => handlePollutantClick(pm25Data, getGuidelineColor(sensorData.indoor_pm25, 'pm25', selectedGuideline), selectedThresholds.pm25, "PM₂.₅ conc", 'PM 2.5')}>
                         <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
                       </Button></p>
                       </ThemeProvider>
@@ -570,11 +571,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     <p className="text-3xl font-bold ml-2" style={{ color: getGuidelineColor(sensorData.indoor_temperature, 'temp', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.indoor_temperature)} duration={1000} /> <span className="text-l align-text-bottom"> °C </span>
                       <ThemeProvider theme={theme}>
-                      <p><Button variant="outlined" 
+                      <p><Button variant={clickedButton === 'Temperature' ? 'contained' : 'outlined'}
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
-                        onClick={() => handlePollutantClick(tempData, getGuidelineColor(sensorData.indoor_temperature, 'temp', selectedGuideline), 23, "Temperature value")}>
+                        onClick={() => handlePollutantClick(tempData, getGuidelineColor(sensorData.indoor_temperature, 'temp', selectedGuideline), 23, "Temperature value", 'Temperature')}>
                         <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
                       </Button></p>
                       </ThemeProvider>
@@ -620,11 +621,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                       <AnimatedNumber value={getSafeValue(sensorData.humidity)} duration={1000} /> 
                       <p></p><span className="text-l align-text-bottom"> % </span>
                       <ThemeProvider theme={theme}>
-                      <p><Button variant="outlined" 
+                      <p><Button variant={clickedButton === 'Humidity' ? 'contained' : 'outlined'}
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
-                        onClick={() => handlePollutantClick(humidityData, getGuidelineColor(sensorData.humidity, 'humidity', selectedGuideline), 70, "Humidity value")}>
+                        onClick={() => handlePollutantClick(humidityData, getGuidelineColor(sensorData.humidity, 'humidity', selectedGuideline), 70, "Humidity value", "Humidity")}>
                         <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
                       </Button></p>
                       </ThemeProvider>
@@ -670,11 +671,11 @@ const Co2DataCard = ({ selectedDevice, selectedOutdoorDevice, selectedGuideline,
                     <p className="text-3xl font-bold ml-2 mr-0" style={{ color: getGuidelineColor(sensorData.tvoc, 'tvoc', selectedGuideline) }}>
                       <AnimatedNumber value={getSafeValue(sensorData.tvoc)} duration={1000} /> <span className="text-l align-text-bottom"> µg/m³</span>
                       <ThemeProvider theme={theme}>
-                      <p ><Button variant="outlined" 
+                      <p ><Button variant={clickedButton === 'TVOC' ? 'contained' : 'outlined'}
                         color="grey" 
                         size='small' 
                         sx={{ padding: 1, fontSize: '10px', minWidth: 'auto' }}
-                        onClick={() => handlePollutantClick(tvocData, getGuidelineColor(sensorData.tvoc, 'tvoc', selectedGuideline), selectedThresholds.tvoc, "TVOC")}>
+                        onClick={() => handlePollutantClick(tvocData, getGuidelineColor(sensorData.tvoc, 'tvoc', selectedGuideline), selectedThresholds.tvoc, "TVOC", "TVOC")}>
                       <ShowChartIcon sx={{ padding: 0, margin: 0 }}/>
                       </Button></p>
                       </ThemeProvider>
