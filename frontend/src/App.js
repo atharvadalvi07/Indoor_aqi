@@ -27,7 +27,7 @@ function App() {
   const [outdoorCo2Data, setOutdoorCo2Data] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDevice, setSelectedDevice] = useState('18FE34E3DFC1');
+  const [selectedDevice, setSelectedDevice] = useState('4C11AE131B88');
   const [selectedOutdoorDevice, setSelectedOutdoorDevice] = useState('2CF4328C5A18');
   const [selectedGuideline, setSelectedGuideline] = useState('ISHRAE_A');
   const [selectedIEWGuideline, setSelectedIEWGuideline] = useState('Wellness');
@@ -133,7 +133,7 @@ function App() {
                           onChange={handleDeviceChange}
                           label="Select Indoor Device"
                         >
-                          <MenuItem value="18FE34E3DFC1">1st floor</MenuItem>
+                          {/* <MenuItem value="18FE34E3DFC1">1st floor</MenuItem> */}
                           <MenuItem value="4C11AE131B88">Ground floor</MenuItem>
                         </Select>
                       </FormControl>
